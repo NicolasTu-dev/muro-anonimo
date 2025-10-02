@@ -1,9 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
-import { Copy, LogIn, Send, Shield, DoorOpen } from "lucide-react";
+import {  LogIn, Send, DoorOpen } from "lucide-react";
 
-// Simple utility to format dates in user's locale
+const SUPABASE_URL = "https://kfkdwnwztquorlegrudb.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtma2R3bnd6dHF1b3JsZWdydWRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0MzI3NjIsImV4cCI6MjA3NTAwODc2Mn0.qugH_G_44fiQ2QUHrKoHQFSdvXzrhVtTo9qMMwBNf4A";
+
 function formatDate(d) {
   try {
     return new Date(d).toLocaleString(undefined, {
@@ -18,7 +20,6 @@ function formatDate(d) {
   }
 }
 
-// Persist + load from localStorage with a key
 const useStoredState = (key, initial) => {
   const [val, setVal] = useState(() => {
     const raw = localStorage.getItem(key);
@@ -32,8 +33,8 @@ const useStoredState = (key, initial) => {
 
 export default function AnonymousWall() {
   // Connection and identity
-  const [url, setUrl] = useStoredState("aw_supabase_url", "");
-  const [anonKey, setAnonKey] = useStoredState("aw_supabase_anon", "");
+  const [url] = useStoredState("aw_supabase_url", "");
+  const [anonKey] = useStoredState("aw_supabase_anon", "");
   const [wall, setWall] = useStoredState("aw_wall_slug", "pistas-navidad");
   const [alias, setAlias] = useStoredState("aw_alias", "");
   const [connected, setConnected] = useState(false);
@@ -43,7 +44,7 @@ export default function AnonymousWall() {
   const supabase = useMemo(() => {
     if (!url || !anonKey) return null;
     try {
-      return createClient(url, anonKey, { db: { schema: "public" } });
+      return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: "public" } });
     } catch (e) {
       console.error(e);
       return null;
@@ -132,12 +133,6 @@ export default function AnonymousWall() {
     setConnected(false);
   };
 
-  const shareRef = useRef(null);
-  const copyShare = () => {
-    const txt = `Únete al muro anónimo\nWall: ${wall}`;
-    navigator.clipboard?.writeText(txt);
-  };
-
   return (
     <div className="min-h-screen bg-neutral-100 py-10">
       <div className="max-w-3xl mx-auto px-4">
@@ -152,43 +147,19 @@ export default function AnonymousWall() {
           pueden publicar pistas sin revelar identidad
         </p>
 
-        {/* Connection card */}
         <div className="bg-white rounded-2xl shadow p-5 mb-6">
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium mb-1">
-                Supabase URL
-              </label>
-              <input
-                className="w-full rounded-xl border p-2"
-                placeholder="https://YOUR-PROJECT.supabase.co"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium mb-1">
-                Supabase Anon Key
-              </label>
-              <input
-                className="w-full rounded-xl border p-2"
-                type="password"
-                placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                value={anonKey}
-                onChange={(e) => setAnonKey(e.target.value)}
-              />
-            </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Wall</label>
+              <label className="block text-sm font-medium mb-1">Nombre del muro</label>
               <input
                 className="w-full rounded-xl border p-2"
-                placeholder="pistas-navidad"
+                placeholder="pistas"
                 value={wall}
                 onChange={(e) => setWall(e.target.value.replace(/\s+/g, "-"))}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Alias (opcional)</label>
+              <label className="block text-sm font-medium mb-1">Apodo/Alias, nombre que quieran (opcional)</label>
               <input
                 className="w-full rounded-xl border p-2"
                 placeholder="Anónimo, Duende, etc."
@@ -216,9 +187,7 @@ export default function AnonymousWall() {
             )}
           </div>
 
-          {error && (
-            <div className="mt-3 text-sm text-red-600">{error}</div>
-          )}
+          {error && <div className="mt-3 text-sm text-red-600">{error}</div>}
         </div>
 
         {/* Composer + list */}
