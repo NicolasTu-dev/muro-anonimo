@@ -35,7 +35,7 @@ export default function AnonymousWall() {
   // Connection and identity
   const [url] = useStoredState("aw_supabase_url", "");
   const [anonKey] = useStoredState("aw_supabase_anon", "");
-  const [wall, setWall] = useStoredState("aw_wall_slug", "pistas-navidad");
+  const [wall, setWall] = useStoredState("aw_wall_slug", "muritoDeChill");
   const [alias, setAlias] = useStoredState("aw_alias", "");
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState("");
