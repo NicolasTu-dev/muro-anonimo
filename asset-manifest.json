@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/muro-anonimo/static/css/main.f855e6bc.css",
-    "main.js": "/muro-anonimo/static/js/main.9b278a7b.js",
+    "main.css": "/muro-anonimo/static/css/main.8f1d9fee.css",
+    "main.js": "/muro-anonimo/static/js/main.fefb3272.js",
     "static/js/453.709a4232.chunk.js": "/muro-anonimo/static/js/453.709a4232.chunk.js",
     "index.html": "/muro-anonimo/index.html",
-    "main.f855e6bc.css.map": "/muro-anonimo/static/css/main.f855e6bc.css.map",
-    "main.9b278a7b.js.map": "/muro-anonimo/static/js/main.9b278a7b.js.map",
+    "main.8f1d9fee.css.map": "/muro-anonimo/static/css/main.8f1d9fee.css.map",
+    "main.fefb3272.js.map": "/muro-anonimo/static/js/main.fefb3272.js.map",
     "453.709a4232.chunk.js.map": "/muro-anonimo/static/js/453.709a4232.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.f855e6bc.css",
-    "static/js/main.9b278a7b.js"
+    "static/css/main.8f1d9fee.css",
+    "static/js/main.fefb3272.js"
   ]
 }
