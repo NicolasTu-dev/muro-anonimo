@@ -33,8 +33,6 @@ const useStoredState = (key, initial) => {
 
 export default function AnonymousWall() {
   // Connection and identity
-  const [url] = useStoredState("aw_supabase_url", "");
-  const [anonKey] = useStoredState("aw_supabase_anon", "");
   const [wall, setWall] = useStoredState("aw_wall_slug", "muritoDeChill");
   const [alias, setAlias] = useStoredState("aw_alias", "");
   const [connected, setConnected] = useState(false);
@@ -42,14 +40,13 @@ export default function AnonymousWall() {
 
   // Supabase client (recomputed on creds change)
   const supabase = useMemo(() => {
-    if (!url || !anonKey) return null;
     try {
       return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: "public" } });
     } catch (e) {
       console.error(e);
       return null;
     }
-  }, [url, anonKey]);
+  }, []);
 
   // Data state
   const [clues, setClues] = useState([]);
