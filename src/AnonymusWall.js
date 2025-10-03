@@ -23,6 +23,13 @@ const useStoredState = (key, initial) => {
   return [val, setVal];
 };
 
+// normalizador a minúsculas para alias/content
+const normalizeClue = (c) => ({
+  ...c,
+  alias: c.alias ? String(c.alias).toLowerCase() : null,
+  content: c.content ? String(c.content).toLowerCase() : "",
+});
+
 export default function AnonymousWall() {
   const [alias, setAlias] = useStoredState("aw_alias", "");
   const [clues, setClues] = useState([]);
@@ -37,7 +44,7 @@ export default function AnonymousWall() {
 
   useEffect(() => { document.title = `Muro: ${WALL_SLUG}`; }, []);
 
-  // fetch inicial
+  // fetch inicial (forzando minúsculas)
   useEffect(() => {
     const fetchClues = async () => {
       if (!supabase) return;
@@ -49,13 +56,13 @@ export default function AnonymousWall() {
         .order("created_at", { ascending: false })
         .limit(200);
       if (error) setError(error.message);
-      else setClues(data || []);
+      else setClues((data || []).map(normalizeClue));
       setLoading(false);
     };
     fetchClues();
   }, [supabase]);
 
-  // realtime
+  // realtime (INSERT/UPDATE/DELETE) con normalización
   useEffect(() => {
     if (!supabase) return;
     const channel = supabase
@@ -65,10 +72,10 @@ export default function AnonymousWall() {
         { event: "*", schema: "public", table: "clues" },
         (payload) => {
           if (payload.eventType === "INSERT" && payload.new?.wall_slug === WALL_SLUG) {
-            setClues((prev) => [payload.new, ...prev]);
+            setClues((prev) => [normalizeClue(payload.new), ...prev]);
           }
           if (payload.eventType === "UPDATE" && payload.new?.wall_slug === WALL_SLUG) {
-            setClues((prev) => prev.map((c) => (c.id === payload.new.id ? payload.new : c)));
+            setClues((prev) => prev.map((c) => (c.id === payload.new.id ? normalizeClue(payload.new) : c)));
           }
           if (payload.eventType === "DELETE" && payload.old?.wall_slug === WALL_SLUG) {
             setClues((prev) => prev.filter((c) => c.id !== payload.old.id));
@@ -79,13 +86,21 @@ export default function AnonymousWall() {
     return () => { supabase.removeChannel(channel); };
   }, [supabase]);
 
+  // publicar pista (guardando en minúsculas)
   const addClue = async () => {
     setError("");
     if (!content.trim()) return;
     if (!supabase) { setError("No hay conexión a Supabase."); return; }
-    const payload = { wall_slug: WALL_SLUG, alias: alias?.trim() || null, content: content.trim() };
+
+    const payload = {
+      wall_slug: WALL_SLUG,
+      alias: alias?.trim() ? alias.trim().toLowerCase() : null,
+      content: content.trim().toLowerCase(),
+    };
+
     const { error } = await supabase.from("clues").insert(payload);
-    if (error) setError(error.message); else setContent("");
+    if (error) setError(error.message);
+    else setContent("");
   };
 
   return (
@@ -104,9 +119,10 @@ export default function AnonymousWall() {
             </label>
             <input
               className="input"
-              placeholder="Anónimo, Duende, etc."
+              style={{ textTransform: "lowercase" }}              // vista en minúsculas
+              placeholder="anónimo, duende, etc."
               value={alias}
-              onChange={(e) => setAlias(e.target.value)}
+              onChange={(e) => setAlias(e.target.value.toLowerCase())} // guarda en minúsculas
             />
           </div>
         </div>
@@ -116,9 +132,10 @@ export default function AnonymousWall() {
           <div style={{flex:1}}>
             <textarea
               className="textarea"
-              placeholder="Ej: le gusta el café de especialidad..."
+              style={{ textTransform: "lowercase" }}                // vista en minúsculas
+              placeholder="ej: le gusta el café de especialidad..."
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => setContent(e.target.value.toLowerCase())} // guarda en minúsculas
             />
           </div>
           <div className="actions">
@@ -144,7 +161,7 @@ export default function AnonymousWall() {
             {clues.map((c) => (
               <li key={c.id} className="item">
                 <div className="item-head">
-                  <span className="item-alias">{c.alias || "Anónimo"}</span>
+                  <span className="item-alias">{c.alias || "anónimo"}</span>
                   <span>{formatDate(c.created_at)}</span>
                 </div>
                 <div className="item-content">{c.content}</div>
